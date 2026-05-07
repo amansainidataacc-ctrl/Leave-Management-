@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Leave Management</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 380px;
+            background: #ff8c00;
+            padding: 18px 30px 26px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .container.wide {
+            max-width: 1120px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            text-align: center;
+            font-size: 26px;
+        }
+
+        .logo-wrap {
+            display: flex;
+            justify-content: center;
+            margin: -6px 0 -2px;
+        }
+
+        .company-logo {
+            display: block;
+            width: min(92%, 480px);
+            height: auto;
+            max-height: 177px;
+            object-fit: contain;
+        }
+
+        .topbar h2 {
+            margin: 0;
+            text-align: left;
+        }
+
+        input,
+        button {
+            width: 100%;
+            font: inherit;
+            border-radius: 8px;
+        }
+
+        input {
+            display: block;
+            padding: 11px;
+            margin-bottom: 12px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            padding: 12px;
+            background: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        button:hover {
+            background: #222;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .small-button {
+            width: auto;
+            padding: 10px 14px;
+            white-space: nowrap;
+        }
+
+        .logout {
+            background: #374151;
+        }
+
+        .logout:hover {
+            background: #1f2937;
+        }
+
+        .reject {
+            background: #b91c1c;
+        }
+
+        .reject:hover {
+            background: #991b1b;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            min-height: 20px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            background: white;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+            color: #1f2937;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: black;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .actions button {
+            width: auto;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0 10px;
+        }
+
+        .section-title h3 {
+            margin: 0;
+            color: white;
+            font-size: 18px;
+        }
+
+        .email-summary {
+            margin: 0 0 10px;
+            min-height: 18px;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .email-jobs-table {
+            min-width: 760px;
+        }
+
+        .error-cell {
+            max-width: 360px;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .empty {
+            text-align: center;
+            color: #6b7280;
+            padding: 28px;
+        }
+
+        @media (max-width: 700px) {
+            .topbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .topbar h2 {
+                text-align: center;
+            }
+
+            .small-button {
+                width: 100%;
+            }
+
+            .top-actions {
+                flex-direction: column;
+            }
+
+            .section-title {
+                align-items: stretch;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main id="container" class="container">
+        <div class="logo-wrap">
+            <img class="company-logo"
+                src="https://drive.google.com/thumbnail?id=1oqFkpO8Hhv7IEYeKXWq19uubuKeFHCZ9&amp;sz=w800"
+                alt="Analytics Career Connect logo">
+        </div>
+
+        <section id="loginBox">
+            <h2>Admin Login</h2>
+
+            <form id="loginForm">
+                <input id="email" type="email" placeholder="Admin email" autocomplete="username" required>
+                <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+                <button id="loginBtn" type="submit">Login</button>
+                <div id="loginMessage" class="message"></div>
+            </form>
+        </section>
+
+        <section id="panel" class="hidden">
+            <div class="topbar">
+                <h2>Leave Admin Panel</h2>
+                <div class="top-actions">
+                    <button id="refreshBtn" class="small-button" type="button">Refresh</button>
+                    <button id="logoutBtn" class="small-button logout" type="button">Logout</button>
+                </div>
+            </div>
+            <div id="panelMessage" class="message"></div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Employee ID</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Batch</th>
+                            <th>Reason</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaveRows">
+                        <tr>
+                            <td class="empty" colspan="9">Login to view leave requests.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-title">
+                <h3>Email Status</h3>
+                <button id="retryEmailJobsBtn" class="small-button" type="button">Retry Failed Emails</button>
+            </div>
+            <div id="emailSummary" class="email-summary"></div>
+            <div class="table-wrap">
+                <table class="email-jobs-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Attempts</th>
+                            <th>Updated</th>
+                            <th>Last Error</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emailJobRows">
+                        <tr>
+                            <td class="empty" colspan="6">Login to view email status.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = location.protocol === "file:" ? "http://localhost:3000" : "";
+
+        let loggedIn = false;
+        let adminToken = localStorage.getItem("adminToken") || "";
+
+        const container = document.getElementById("container");
+        const loginBox = document.getElementById("loginBox");
+        const panel = document.getElementById("panel");
+        const loginForm = document.getElementById("loginForm");
+        const loginBtn = document.getElementById("loginBtn");
+        const refreshBtn = document.getElementById("refreshBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const retryEmailJobsBtn = document.getElementById("retryEmailJobsBtn");
+        const leaveRows = document.getElementById("leaveRows");
+        const emailJobRows = document.getElementById("emailJobRows");
+        const emailSummary = document.getElementById("emailSummary");
+        const loginMessage = document.getElementById("loginMessage");
+        const panelMessage = document.getElementById("panelMessage");
+
+        loginForm.addEventListener("submit", login);
+        refreshBtn.addEventListener("click", loadDashboard);
+        logoutBtn.addEventListener("click", () => logout());
+        retryEmailJobsBtn.addEventListener("click", retryFailedEmails);
+
+        if (adminToken) {
+            showPanel();
+            loadDashboard();
+        }
+
+        async function login(event) {
+            event.preventDefault();
+
+            loginMessage.textContent = "";
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Logging in...";
+
+            try {
+                const res = await fetch(API_BASE + "/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: document.getElementById("email").value,
+                        password: document.getElementById("password").value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok || !data.success || !data.token) {
+                    loginMessage.textContent = data.message || "Login failed. Admin details check karo.";
+                    return;
+                }
+
+                adminToken = data.token;
+                localStorage.setItem("adminToken", adminToken);
+                showPanel();
+                await loadDashboard();
+            } catch (err) {
+                loginMessage.textContent = "Server connect nahi ho raha. http://localhost:3000/admin.html se open karo.";
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = "Login";
+            }
+        }
+
+        async function loadDashboard() {
+            await loadData();
+            await loadEmailJobs();
+        }
+
+        async function loadData() {
+            if (!loggedIn || !adminToken) {
+                loginMessage.textContent = "Login first.";
+                return;
+            }
+
+            panelMessage.textContent = "";
+            leaveRows.innerHTML = '<tr><td class="empty" colspan="9">Loading leave requests...</td></tr>';
+
+            try {
+                const res = await fetch(API_BASE + "/leaves", {
+                    headers: authHeaders()
+                });
+
+                if (res.status === 401) {
+                    logout("Session expired. Please login again.");
+                    return;
+                }
+
+                const leaves = await res.json();
+
+                if (!leaves.length) {
+                    leaveRows.innerHTML = '<tr><td class="empty" colspan="9">No leave requests found.</td></tr>';
+                    return;
+                }
+
+                leaveRows.innerHTML = "";
+                leaves.forEach((leave) => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                <td>${escapeHtml(leave.name)}</td>
+                <td>${escapeHtml(leave.employeeId)}</td>
+                <td>${formatDate(leave.startDate)}</td>
+                <td>${formatDate(leave.endDate)}</td>
+                <td>${escapeHtml(leave.team)}</td>
+                <td>${escapeHtml(leave.reason)}</td>
+                <td>${escapeHtml(leave.email)}</td>
+                <td>${escapeHtml(leave.status || "Pending")}</td>
+                <td>
+                    <div class="actions">
+                        <button type="button" onclick="approveLeave(${leave.id})">Approve</button>
+                        <button class="reject" type="button" onclick="rejectLeave(${leave.id})">Reject</button>
+                    </div>
+                </td>
+            `;
+
+                    leaveRows.appendChild(row);
+                });
+            } catch (err) {
+                leaveRows.innerHTML = '<tr><td class="empty" colspan="9">Data load nahi hua. Server check karo.</td></tr>';
+            }
+        }
+
+        async function loadEmailJobs() {
+            if (!loggedIn || !adminToken) return;
+
+            emailJobRows.innerHTML = '<tr><td class="empty" colspan="6">Loading email status...</td></tr>';
+
+            try {
+                const res = await fetch(API_BASE + "/email-jobs", {
+                    headers: authHeaders()
+                });
+
+                if (res.status === 401) {
+                    logout("Session expired. Please login again.");
+                    return;
+                }
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    emailJobRows.innerHTML = '<tr><td class="empty" colspan="6">Email status load nahi hua.</td></tr>';
+                    return;
+                }
+
+                renderEmailSummary(data.configuration || {});
+
+                const jobs = data.jobs || [];
+                if (!jobs.length) {
+                    emailJobRows.innerHTML = '<tr><td class="empty" colspan="6">No email jobs found yet.</td></tr>';
+                    return;
+                }
+
+                emailJobRows.innerHTML = "";
+                jobs.forEach((job) => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                <td>${escapeHtml(job.id)}</td>
+                <td>${escapeHtml(job.type)}</td>
+                <td>${escapeHtml(job.status)}</td>
+                <td>${escapeHtml(job.attempts)}</td>
+                <td>${formatDateTime(job.updatedAt || job.createdAt)}</td>
+                <td class="error-cell">${escapeHtml(job.lastError || "")}</td>
+            `;
+
+                    emailJobRows.appendChild(row);
+                });
+            } catch (err) {
+                emailJobRows.innerHTML = '<tr><td class="empty" colspan="6">Email status load nahi hua. Server check karo.</td></tr>';
+            }
+        }
+
+        function renderEmailSummary(config) {
+            const provider = config.provider || "smtp";
+            const providerReady = provider === "resend"
+                ? config.resendConfigured
+                : provider === "sendgrid"
+                    ? config.sendgridConfigured
+                    : config.smtpConfigured;
+
+            emailSummary.textContent = `Provider: ${provider} | Ready: ${providerReady ? "yes" : "no"} | From: ${config.fromConfigured ? "yes" : "no"} | Admin email: ${config.notificationEmailConfigured ? "yes" : "no"}`;
+        }
+
+        async function approveLeave(id) {
+            await updateLeaveStatus("/approve/" + id);
+        }
+
+        async function rejectLeave(id) {
+            await updateLeaveStatus("/reject/" + id);
+        }
+
+        async function updateLeaveStatus(path) {
+            panelMessage.textContent = "Updating...";
+
+            try {
+                const res = await fetch(API_BASE + path, {
+                    method: "PUT",
+                    headers: authHeaders()
+                });
+
+                if (res.status === 401) {
+                    logout("Session expired. Please login again.");
+                    return;
+                }
+
+                const data = await res.json();
+                panelMessage.textContent = data.message || "Updated";
+                await loadDashboard();
+            } catch (err) {
+                panelMessage.textContent = "Update failed. Server check karo.";
+            }
+        }
+
+        async function retryFailedEmails() {
+            panelMessage.textContent = "Retrying failed emails...";
+            retryEmailJobsBtn.disabled = true;
+
+            try {
+                const res = await fetch(API_BASE + "/email-jobs/retry-failed", {
+                    method: "POST",
+                    headers: authHeaders()
+                });
+
+                if (res.status === 401) {
+                    logout("Session expired. Please login again.");
+                    return;
+                }
+
+                const data = await res.json();
+                panelMessage.textContent = data.message || "Retry queued.";
+                await loadEmailJobs();
+            } catch (err) {
+                panelMessage.textContent = "Email retry failed. Server check karo.";
+            } finally {
+                retryEmailJobsBtn.disabled = false;
+            }
+        }
+
+        function authHeaders() {
+            return {
+                Authorization: "Bearer " + adminToken
+            };
+        }
+
+        function showPanel() {
+            loggedIn = true;
+            loginBox.classList.add("hidden");
+            panel.classList.remove("hidden");
+            container.classList.add("wide");
+        }
+
+        function logout(message = "") {
+            loggedIn = false;
+            adminToken = "";
+            localStorage.removeItem("adminToken");
+            panel.classList.add("hidden");
+            loginBox.classList.remove("hidden");
+            container.classList.remove("wide");
+            leaveRows.innerHTML = '<tr><td class="empty" colspan="9">Login to view leave requests.</td></tr>';
+            emailJobRows.innerHTML = '<tr><td class="empty" colspan="6">Login to view email status.</td></tr>';
+            emailSummary.textContent = "";
+            panelMessage.textContent = "";
+            loginMessage.textContent = message;
+        }
+
+        function formatDate(value) {
+            if (!value) return "";
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return escapeHtml(value);
+            return date.toLocaleDateString();
+        }
+
+        function formatDateTime(value) {
+            if (!value) return "";
+
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return String(value);
+
+            return date.toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
