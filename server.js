@@ -356,21 +356,38 @@ async function cleanupOldEmailJobs() {
 }
 
 async function createDefaultAdmin() {
-    const countResult = await db.query("SELECT COUNT(*) AS total FROM admin");
-
-    if (Number(countResult.rows[0].total) > 0) return;
-
     if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-        console.log("No admin found. Set ADMIN_EMAIL and ADMIN_PASSWORD in Vercel environment variables, then redeploy.");
+        console.log("No admin credentials found in environment variables.");
         return;
     }
 
-    await db.execute(
-        "INSERT INTO admin (email, password) VALUES (?, ?)",
-        [ADMIN_EMAIL.trim(), hashPassword(ADMIN_PASSWORD)]
+    const email = ADMIN_EMAIL.trim().toLowerCase();
+    const [rows] = await db.execute(
+        "SELECT * FROM admin WHERE LOWER(email) = ?",
+        [email]
     );
 
-    console.log(`Default admin created: ${ADMIN_EMAIL.trim()}`);
+    if (rows.length === 0) {
+        await db.execute(
+            "INSERT INTO admin (email, password) VALUES (?, ?)",
+            [email, hashPassword(ADMIN_PASSWORD)]
+        );
+        console.log(`Default admin created: ${email}`);
+    } else {
+        // Update password if it doesn't match or is not hashed correctly
+        const admin = rows[0];
+        const validPassword = verifyPassword(ADMIN_PASSWORD, admin.password);
+        
+        if (!validPassword) {
+            await db.execute(
+                "UPDATE admin SET password = ? WHERE id = ?",
+                [hashPassword(ADMIN_PASSWORD), admin.id]
+            );
+            console.log(`Admin password updated for: ${email}`);
+        } else {
+            console.log(`Admin already exists and password is correct: ${email}`);
+        }
+    }
 }
 
 function hashPassword(password) {
